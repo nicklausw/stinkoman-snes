@@ -1,8 +1,8 @@
-CC = ca65
-LD = ld65
+ASM16 = asm16
 FIX = tools/snes-check.py
 RLE = tools/rle.py
 GFXCONV = tools/snes-tile-tool.py
+WAVCONV = tools/wav2brr.py
 
 CFG = snes.cfg
 
@@ -12,28 +12,31 @@ EMU = bsnes
 
 IFILES = $(wildcard inc/*.i)
 SFILES = $(wildcard src/*.s)
-OFILES = $(subst .s,.o,$(subst src/,obj/,$(SFILES)))
 
 GFX = $(wildcard gfx/*.bmp)
 CHR_G = $(subst .bmp,.chr,$(GFX))
 RLE_G = $(subst .chr,.rle,$(CHR_G))
 
+WAV = $(wildcard audio/*.wav)
+BRR = $(subst .wav,.brr,$(WAV))
+
 all: $(TITLE).sfc
 	$(EMU) $(TITLE).sfc >/dev/null 2>&1
 
-$(TITLE).sfc: $(OFILES)
-	@echo linking to $(TITLE).sfc...
-	@$(LD) -o $(TITLE).sfc -C $(CFG) $(OFILES)
-	$(FIX) $(TITLE).sfc
+$(TITLE).sfc: $(SFILES)
+	@echo assembling...
+	@$(ASM16) -q src/main.s $(TITLE).sfc
+	@$(FIX) $(TITLE).sfc
 
 $(SFILES): $(IFILES)
 $(SFILES): $(CFG)
 $(SFILES): $(RLE_G)
 $(SFILES): $(GFX)
+$(SFILES): $(WAV)
+$(SFILES): $(BRR)
 
-obj/%.o: src/%.s
-	@echo assembling file $<...
-	@$(CC) -I inc --bin-include-dir gfx -o $@ $<
+audio/%.brr: audio/%.wav
+	$(WAVCONV) $< $@
 
 gfx/%.chr: gfx/%.bmp
 	@echo converting $< to chr format...
@@ -44,4 +47,4 @@ gfx/%.rle: gfx/%.chr
 	@$(RLE) $< $@
 
 clean:
-	rm -f $(OFILES) $(RLE_G) gfx/*.nam gfx/*.pal $(TITLE).sfc
+	rm -f $(RLE_G) gfx/*.nam gfx/*.pal $(TITLE).sfc

@@ -1,6 +1,4 @@
-.include "global.i"
-
-.proc ppu_copy
+ppu_copy:
   php
   setaxy16
   sta DMAMODE
@@ -13,15 +11,14 @@
   lda #%00000001
   sta COPYSTART
   plp
-  rts
-.endproc
+  rtl
 
 
-.proc scrn_copy
+scrn_copy:
   setxy16
   ldy #$00
 
-loop: seta8
+scrnloop: seta8
   lda (msg_ram), y
   seta16
   and #$ff ; clear higher bit
@@ -29,38 +26,35 @@ loop: seta8
   dex
   iny
   iny
-  cpx #$00
-  bne loop
+  cpx #$0000
+  bne scrnloop
   
-done:
-  rts
-.endproc
+  rtl
 
 
-.proc vblank
+vblank:
   phb
   phk         ; set data bank to bank 0 (because banks $40-$7D
   plb         ; and $C0-$FF can't reach low memory)
-  bit a:NMISTATUS
+  bit NMISTATUS ; absolute somehow?
   plb
   rti
-.endproc
 
 ;;
 ; Decompresses data to rle_cp_dat using a simple RLE scheme.
 ; @param DBR:rle_cp_src pointer to compressed data
 ; @return rle_cp_index = 4
-.proc rle_copy_ram
+rle_copy_ram:
   setxy16
   seta8
   ldy #$00
   sty rle_cp_index
   tya  ; clear low and high bytes of accumulator
 
- loop:
+ rle_loop:
   lda (rle_cp_src),y
   cpa #$ff  ; RLE data is terminated by a run length of $FF
-  beq done  ; But what does a run length of 0 do?
+  beq rle_done  ; But what does a run length of 0 do?
   cpa #$fe
   beq copy_fe
   tax
@@ -93,7 +87,7 @@ rle_inter:
 
   stx rle_cp_index
   ply  ; Restore source index
-  bra loop
+  bra rle_loop
 
 copy_fe:
   
@@ -134,8 +128,7 @@ fe_loop:
   ; put the index back
   stx rle_cp_index
   
-  bra loop
+  bra rle_loop
   
-done:
+rle_done:
   rtl
-.endproc

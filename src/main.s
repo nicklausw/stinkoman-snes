@@ -1,9 +1,17 @@
-.include "global.i"
+.include "inc/snes.i"
+
+; macros
+
+; palette macro
+.macro bgr cb,g,r
+  .dw ((cb<<10)|(g<<5)|r)
+.endm
+
 
 ; the code
-.segment "CODE"
+.org $808000
 
-.proc reset
+reset:
   
   ; forced blank
   seta8
@@ -46,8 +54,8 @@
   stz PPUADDR
   
   lda #DMAMODE_PPUDATA
-  ldx #.loword(rle_cp_dat)
-  ldy 8192
+  ldx #rle_cp_dat & $ffff
+  ldy #8192
   
   php
   setaxy16
@@ -55,7 +63,7 @@
   stx DMAADDR
   sty DMALEN
   seta8
-  lda #.bankbyte(rle_cp_dat)
+  lda #rle_cp_dat >> 16
   sta DMAADDRBANK
   lda #%00000001
   sta COPYSTART
@@ -63,12 +71,13 @@
   
   setaxy16
   
-  lda #$6000|NTXY(0,8)
+ ;lda #$6000|NTXY(0,8)
+  lda #$6000|((0)|((8)<<5))
   sta PPUADDR
 
 
   lda #fontnam & $ffff
-  ldx #$5ff
+  ldx #$100
   sta msg_ram
   jsr scrn_copy
   
@@ -108,10 +117,9 @@ fade_in:
   cpa #$10
   bne fade_in
   
-?forever:
+forever:
   wai
-  jmp ?forever
-.endproc
+  jml forever
 
 
 message:
@@ -119,7 +127,28 @@ message:
   .byte "Screw you, it's a platformer.", $ff
 
 ground:
-  .repeat 32
+  .rept 32
    .byte '_'
-  .endrepeat
+  .endr
   .byte $ff
+
+;useless handlers for snes header
+cop_handler:
+brk_handler:
+abort_handler:
+ecop_handler:
+eabort_handler:
+enmi_handler:
+eirq_handler:
+irq_handler:
+  rti
+
+.include "src/gfx.s"
+.include "src/ppu.s"
+.include "src/ram.s"
+.include "src/initialize_snes.s"
+
+.include "src/snesheader.s"
+
+.org $828000-1
+db 0

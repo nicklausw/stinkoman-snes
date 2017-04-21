@@ -1,14 +1,9 @@
 ; the gfx
-
-.include "global.i"
-
-.segment "RODATA"
-
 palette:
-  .incbin "videlectrix.pal"
+  .incbin "gfx/videlectrix.pal"
 palette_size:
 
 font:
-  .incbin "videlectrix.rle"
+  .incbin "gfx/videlectrix.rle"
 
-fontnam: .incbin "videlectrix.nam"
+fontnam: .incbin "gfx/videlectrix.nam"

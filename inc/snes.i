@@ -21,10 +21,6 @@
 ; misappropriation, and because sometimes these make more sense.
 ;
 
-.ifndef SNES_H
-.define SNES_H
-.p816
-
 ; S-PPU configuration ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 PPUBRIGHT = $2100
@@ -119,7 +115,7 @@ NTADDR = $2107  ; through $210A
 ;  |||||+-- Nametable height (0: 1 screen, 1: 2 screens)
 ;  +++++--- Nametable base address in $400 units
 ; Each nametable in modes 0-6 is 32 rows, each 32 spaces long.
-.define NTXY(xc,yc) ((xc)|((yc)<<5))
+;.define NTXY(xc,yc) ((xc)|((yc)<<5))
 
 BGCHRADDR = $210B
 ; FEDCBA98 76543210
@@ -179,7 +175,7 @@ PPUDATARDHI = $213A
 CGADDR = $2121
 CGDATA = $2122  ; 5-bit BGR, write twice, low byte first
 CGDATARD = $213B  ; 5-bit BGR, read twice, low byte first
-.define RGB(r,g,b) ((r)|((g)<<5)|((b)<<10))
+;.define RGB(r,g,b) ((r)|((g)<<5)|((b)<<10))
 
 ; S-PPU window ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -511,22 +507,22 @@ JOY4H  = JOY2B1CUR+1
 ; SEP/REP and generate appropriately wide immediate values.
 .macro setxy8
   sep #$10
-.endmacro
+.endm
 .macro setxy16
   rep #$10
-.endmacro
+.endm
 .macro seta8
   sep #$20
-.endmacro
+.endm
 .macro seta16
   rep #$20
-.endmacro
+.endm
 .macro setaxy8
   sep #$30
-.endmacro
+.endm
 .macro setaxy16
   rep #$30
-.endmacro
+.endm
 
 
 ; Macros to push constant values on the stack to be pulled off
@@ -541,7 +537,7 @@ first_ = first
 second_ = second
 arg = (first_ & $FF) | ((second_ & $FF) << 8)
   pea arg
-.endmacro
+.endm
 
 ;;
 ; Pushes the bank byte of two addresses such that
@@ -556,6 +552,4 @@ arg = (first_ & $FF) | ((second_ & $FF) << 8)
 first_ = first
 second_ = second
   ph2b ^first_, ^second_
-.endmacro
-
-.endif
+.endm

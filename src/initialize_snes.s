@@ -1,20 +1,16 @@
 ; thanks to espozo/koitsu/neviksti for the init snes routine!
 ; this is the only one i've found that really seems to work.
 
-.include "global.i"
-
-.segment "CODE"
-
-.proc InitializeSNES
+InitializeSNES:
   ; Register initialisation values, per official Nintendo documentation
   
   sei          ; Disable interrupts
   clc          ; Clear carry, used by XCE
   xce          ; Set 65816 native mode
-  jmp :+       ; Needed to set K (bank of PC) properly if MODE 21 is ever used;
+  jml +       ; Needed to set K (bank of PC) properly if MODE 21 is ever used;
                ; see official SNES developers docs, "Programming Cautions"
 
-: cld          ; Disable decimal mode
++: cld          ; Disable decimal mode
   phk          ; Push K (PC bank)
   plb          ; Pull B (data bank, i.e. data bank now equals PC bank)
 
@@ -135,9 +131,9 @@
   STX $4300         ;Set DMA mode to fixed source, WORD to $2118/9
   LDX #$0000
   STX $2116         ;Set VRAM port address to $0000
-  LDX #.LOWORD(zero_fill_byte)
+  LDX #zero_fill_byte & $ffff
   STX $4302         ;Set source address to $xx:0000
-  LDA #.BANKBYTE(zero_fill_byte)
+  LDA #zero_fill_byte >> 16
   STA $4304         ;Set source bank
   LDX #$0000
   STX $4305         ;Set transfer size to 65536 bytes
@@ -183,9 +179,9 @@ _Loop09:
 
   LDX #$8008
   STX $4300         ;Set DMA mode to fixed source, BYTE to $2180
-  LDX #.LOWORD(zero_fill_byte)
+  LDX #zero_fill_byte & $ffff
   STX $4302         ;Set source offset
-  LDA #.BANKBYTE(zero_fill_byte)
+  LDA #zero_fill_byte >> 16
   STA $4304         ;Set source bank
   LDX #$0000
   STX $4305         ;Set transfer size to 64KBytes (65536 bytes)
@@ -194,8 +190,7 @@ _Loop09:
 
   LDA #$01          ;now zero the next 64KB (i.e. 128KB total)
   STA $420B         ;Initiate transfer
-  jmp reset
+  jml reset
 
  zero_fill_byte:
   .byte $00
-.endproc
