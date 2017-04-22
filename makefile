@@ -4,8 +4,6 @@ RLE = tools/rle.py
 GFXCONV = tools/snes-tile-tool.py
 WAVCONV = tools/wav2brr.py
 
-CFG = snes.cfg
-
 TITLE = stinkoman
 
 EMU = bsnes
@@ -21,7 +19,8 @@ WAV = $(wildcard audio/*.wav)
 BRR = $(subst .wav,.brr,$(WAV))
 
 all: $(TITLE).sfc
-	$(EMU) $(TITLE).sfc >/dev/null 2>&1
+	@echo opening in $(EMU)...
+	@$(EMU) $(TITLE).sfc >/dev/null 2>&1
 
 $(TITLE).sfc: $(SFILES)
 	@echo assembling...
@@ -29,7 +28,6 @@ $(TITLE).sfc: $(SFILES)
 	@$(FIX) $(TITLE).sfc
 
 $(SFILES): $(IFILES)
-$(SFILES): $(CFG)
 $(SFILES): $(RLE_G)
 $(SFILES): $(GFX)
 $(SFILES): $(WAV)
