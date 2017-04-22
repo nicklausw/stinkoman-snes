@@ -12,7 +12,7 @@
   
  .byte $30 ; lorom fastrom
  .byte $00 ; no battery ram
- .byte $07 ; 256K rom
+ .byte $08 ; 256K rom
  
  .dsb 12
  
